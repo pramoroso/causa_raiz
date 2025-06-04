@@ -5,20 +5,6 @@ from datetime import datetime
 import os
 from fpdf import FPDF
 
-# Configuração da página
-st.set_page_config(page_title="Causa Raiz", layout="centered", initial_sidebar_state="collapsed")
-
-st.markdown("## 🧠 Causa Raiz")
-st.markdown("### Desenvolvido por Paulo Amoroso")
-st.markdown("---")
-
-# Inicializa o DataFrame
-DATA_FILE = "problemas.csv"
-if os.path.exists(DATA_FILE):
-    df = pd.read_csv(DATA_FILE)
-else:
-    df = pd.DataFrame(columns=["Data", "Título", "Categoria", "Descrição", "Porquê 1", "Porquê 2", "Porquê 3", "Porquê 4", "Porquê 5", "Causa Raiz", "Ação Corretiva", "Responsável", "Prazo"])
-
 # Inicializa valores padrão no session_state
 valores_iniciais = {
     "titulo": "",
@@ -38,6 +24,28 @@ valores_iniciais = {
 for campo, valor in valores_iniciais.items():
     if campo not in st.session_state:
         st.session_state[campo] = valor
+
+# Limpa os campos logo no início se resetar = True
+if st.session_state.resetar:
+    for campo in valores_iniciais:
+        if campo != "resetar":
+            st.session_state[campo] = valores_iniciais[campo]
+    st.session_state.resetar = False
+    st.rerun()
+
+# Configuração da página
+st.set_page_config(page_title="Causa Raiz", layout="centered", initial_sidebar_state="collapsed")
+
+st.markdown("## 🧠 Causa Raiz")
+st.markdown("### Desenvolvido por Paulo Amoroso")
+st.markdown("---")
+
+# Inicializa o DataFrame
+DATA_FILE = "problemas.csv"
+if os.path.exists(DATA_FILE):
+    df = pd.read_csv(DATA_FILE)
+else:
+    df = pd.DataFrame(columns=["Data", "Título", "Categoria", "Descrição", "Porquê 1", "Porquê 2", "Porquê 3", "Porquê 4", "Porquê 5", "Causa Raiz", "Ação Corretiva", "Responsável", "Prazo"])
 
 # Formulário de entrada
 with st.form("registro_problema"):
@@ -76,17 +84,8 @@ with st.form("registro_problema"):
         df = pd.concat([df, pd.DataFrame([nova_linha])], ignore_index=True)
         df.to_csv(DATA_FILE, index=False)
         st.success("Problema registrado com sucesso!")
-
-        # Sinaliza para limpar fora do form
         st.session_state.resetar = True
-
-# Executa limpeza fora do formulário, após o rerun
-if st.session_state.resetar:
-    for campo in ["titulo", "categoria", "descricao", "pq1", "pq2", "pq3", "pq4", "pq5", "causa_raiz", "acao", "responsavel"]:
-        st.session_state[campo] = ""
-    st.session_state["prazo"] = datetime.today()
-    st.session_state.resetar = False
-    st.rerun()
+        st.rerun()
 
 # Histórico e PDF
 st.markdown("---")
