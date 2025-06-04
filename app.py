@@ -2,6 +2,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+import os
 
 # Configuração da página
 st.set_page_config(page_title="Causa Raiz", layout="centered", initial_sidebar_state="collapsed")
