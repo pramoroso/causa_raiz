@@ -2,50 +2,44 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-import os
 from fpdf import FPDF
 
-# Inicializa valores padrão no session_state
-valores_iniciais = {
+# Inicializa session_state
+if "dados" not in st.session_state:
+    st.session_state.dados = pd.DataFrame(columns=[
+        "Data", "Título", "Categoria", "Descrição", "Porquê 1", "Porquê 2",
+        "Porquê 3", "Porquê 4", "Porquê 5", "Causa Raiz", "Ação Corretiva",
+        "Responsável", "Prazo"
+    ])
+
+# Inicializa campos padrão
+campos_iniciais = {
     "titulo": "",
     "categoria": "Qualidade",
     "descricao": "",
-    "pq1": "",
-    "pq2": "",
-    "pq3": "",
-    "pq4": "",
-    "pq5": "",
+    "pq1": "", "pq2": "", "pq3": "", "pq4": "", "pq5": "",
     "causa_raiz": "",
     "acao": "",
     "responsavel": "",
     "prazo": datetime.today(),
     "resetar": False
 }
-for campo, valor in valores_iniciais.items():
+for campo, valor in campos_iniciais.items():
     if campo not in st.session_state:
         st.session_state[campo] = valor
 
-# Limpa os campos logo no início se resetar = True
+# Reset campos se necessário
 if st.session_state.resetar:
-    for campo in valores_iniciais:
-        if campo != "resetar":
-            st.session_state[campo] = valores_iniciais[campo]
+    for campo, valor in campos_iniciais.items():
+        st.session_state[campo] = valor
     st.session_state.resetar = False
     st.rerun()
 
 # Configuração da página
 st.set_page_config(page_title="Causa Raiz", layout="centered", initial_sidebar_state="collapsed")
-
 st.markdown("## 🧠 Causa Raiz")
 st.markdown("### Desenvolvido por Paulo Amoroso")
 st.markdown("---")
-
-# Inicializa o DataFrame
-DATA_FILE = "problemas.csv"
-if os.path.exists(DATA_FILE):
-    df = pd.read_csv(DATA_FILE)
-else:
-    df = pd.DataFrame(columns=["Data", "Título", "Categoria", "Descrição", "Porquê 1", "Porquê 2", "Porquê 3", "Porquê 4", "Porquê 5", "Causa Raiz", "Ação Corretiva", "Responsável", "Prazo"])
 
 # Formulário de entrada
 with st.form("registro_problema"):
@@ -71,18 +65,18 @@ with st.form("registro_problema"):
             "Título": titulo,
             "Categoria": categoria,
             "Descrição": descricao,
-            "Porquê 1": pq1,
-            "Porquê 2": pq2,
-            "Porquê 3": pq3,
-            "Porquê 4": pq4,
+            "Porquê 1": pq1, "Porquê 2": pq2,
+            "Porquê 3": pq3, "Porquê 4": pq4,
             "Porquê 5": pq5,
             "Causa Raiz": causa_raiz,
             "Ação Corretiva": acao,
             "Responsável": responsavel,
             "Prazo": prazo
         }
-        df = pd.concat([df, pd.DataFrame([nova_linha])], ignore_index=True)
-        df.to_csv(DATA_FILE, index=False)
+        st.session_state.dados = pd.concat(
+            [st.session_state.dados, pd.DataFrame([nova_linha])],
+            ignore_index=True
+        )
         st.success("Problema registrado com sucesso!")
         st.session_state.resetar = True
         st.rerun()
@@ -90,13 +84,13 @@ with st.form("registro_problema"):
 # Histórico e PDF
 st.markdown("---")
 st.subheader("📚 Histórico de Problemas Registrados")
-if df.empty:
+if st.session_state.dados.empty:
     st.info("Nenhum problema registrado ainda.")
 else:
-    st.dataframe(df.tail(10), use_container_width=True)
+    st.dataframe(st.session_state.dados.tail(10), use_container_width=True)
 
     # Última entrada
-    ultimo = df.iloc[-1]
+    ultimo = st.session_state.dados.iloc[-1]
 
     # Diagrama textual
     st.markdown("### 🔍 Diagrama dos 5 Porquês")
@@ -120,7 +114,6 @@ else:
         pdf.add_page()
         pdf.set_font("Arial", "B", 16)
         pdf.cell(0, 10, "Relatório - Causa Raiz", ln=True)
-
         pdf.set_font("Arial", "", 12)
         for k, v in entrada.items():
             pdf.multi_cell(0, 10, f"{k}: {v}")
