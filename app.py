@@ -19,8 +19,8 @@ if os.path.exists(DATA_FILE):
 else:
     df = pd.DataFrame(columns=["Data", "Título", "Categoria", "Descrição", "Porquê 1", "Porquê 2", "Porquê 3", "Porquê 4", "Porquê 5", "Causa Raiz", "Ação Corretiva", "Responsável", "Prazo"])
 
-# Inicializa valores padrão
-for campo, valor_padrao in {
+# Inicializa valores padrão no session_state
+valores_iniciais = {
     "titulo": "",
     "categoria": "Qualidade",
     "descricao": "",
@@ -32,10 +32,12 @@ for campo, valor_padrao in {
     "causa_raiz": "",
     "acao": "",
     "responsavel": "",
-    "prazo": datetime.today()
-}.items():
+    "prazo": datetime.today(),
+    "resetar": False
+}
+for campo, valor in valores_iniciais.items():
     if campo not in st.session_state:
-        st.session_state[campo] = valor_padrao
+        st.session_state[campo] = valor
 
 # Formulário de entrada
 with st.form("registro_problema"):
@@ -75,21 +77,16 @@ with st.form("registro_problema"):
         df.to_csv(DATA_FILE, index=False)
         st.success("Problema registrado com sucesso!")
 
-        # Reset individual
-        st.session_state.titulo = ""
-        st.session_state.categoria = "Qualidade"
-        st.session_state.descricao = ""
-        st.session_state.pq1 = ""
-        st.session_state.pq2 = ""
-        st.session_state.pq3 = ""
-        st.session_state.pq4 = ""
-        st.session_state.pq5 = ""
-        st.session_state.causa_raiz = ""
-        st.session_state.acao = ""
-        st.session_state.responsavel = ""
-        st.session_state.prazo = datetime.today()
+        # Sinaliza para limpar fora do form
+        st.session_state.resetar = True
 
-        st.rerun()
+# Executa limpeza fora do formulário, após o rerun
+if st.session_state.resetar:
+    for campo in ["titulo", "categoria", "descricao", "pq1", "pq2", "pq3", "pq4", "pq5", "causa_raiz", "acao", "responsavel"]:
+        st.session_state[campo] = ""
+    st.session_state["prazo"] = datetime.today()
+    st.session_state.resetar = False
+    st.rerun()
 
 # Histórico e PDF
 st.markdown("---")
