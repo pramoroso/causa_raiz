@@ -57,10 +57,9 @@ with st.form("registro_problema"):
         df.to_csv(DATA_FILE, index=False)
         st.success("Problema registrado com sucesso!")
 
-        # Limpar os campos do formulário
-        for campo in ["titulo", "categoria", "descricao", "pq1", "pq2", "pq3", "pq4", "pq5", "causa_raiz", "acao", "responsavel"]:
-            st.session_state[campo] = ""
-        st.session_state["prazo"] = datetime.today()
+        # Limpar todos os campos com session_state.clear e recarregar a página
+        st.session_state.clear()
+        st.experimental_rerun()
 
 # Histórico e PDF
 st.markdown("---")
