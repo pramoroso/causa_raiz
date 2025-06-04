@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
+from fpdf import FPDF
 
 # Configuração da página
 st.set_page_config(page_title="Causa Raiz", layout="centered", initial_sidebar_state="collapsed")
@@ -56,11 +57,46 @@ with st.form("registro_problema"):
         df.to_csv(DATA_FILE, index=False)
         st.success("Problema registrado com sucesso!")
 
-# Histórico
+# Histórico e PDF
 st.markdown("---")
 st.subheader("📚 Histórico de Problemas Registrados")
 if df.empty:
     st.info("Nenhum problema registrado ainda.")
 else:
     st.dataframe(df.tail(10), use_container_width=True)
-    st.download_button("📥 Baixar CSV", data=df.to_csv(index=False), file_name="causa_raiz_registros.csv", mime="text/csv")
+
+    # Última entrada
+    ultimo = df.iloc[-1]
+
+    # Diagrama textual
+    st.markdown("### 🔍 Diagrama dos 5 Porquês")
+    st.markdown(f'''
+**Problema:** {ultimo["Descrição"]}  
+⬇️  
+**1️⃣ Por quê?** {ultimo["Porquê 1"]}  
+⬇️  
+**2️⃣ Por quê?** {ultimo["Porquê 2"]}  
+⬇️  
+**3️⃣ Por quê?** {ultimo["Porquê 3"]}  
+⬇️  
+**4️⃣ Por quê?** {ultimo["Porquê 4"]}  
+⬇️  
+**5️⃣ Por quê?** {ultimo["Porquê 5"]}  
+''')
+
+    # Gerar PDF
+    def gerar_pdf(entrada):
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", "B", 16)
+        pdf.cell(0, 10, "Relatório - Causa Raiz", ln=True)
+
+        pdf.set_font("Arial", "", 12)
+        for k, v in entrada.items():
+            pdf.multi_cell(0, 10, f"{k}: {v}")
+        pdf.output("relatorio_ultima_analise.pdf")
+
+    if st.button("📄 Gerar PDF da Última Análise"):
+        gerar_pdf(ultimo)
+        with open("relatorio_ultima_analise.pdf", "rb") as f:
+            st.download_button("📥 Baixar PDF", f, file_name="causa_raiz_analise.pdf")
