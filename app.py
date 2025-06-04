@@ -19,6 +19,24 @@ if os.path.exists(DATA_FILE):
 else:
     df = pd.DataFrame(columns=["Data", "Título", "Categoria", "Descrição", "Porquê 1", "Porquê 2", "Porquê 3", "Porquê 4", "Porquê 5", "Causa Raiz", "Ação Corretiva", "Responsável", "Prazo"])
 
+# Inicializa valores padrão
+for campo, valor_padrao in {
+    "titulo": "",
+    "categoria": "Qualidade",
+    "descricao": "",
+    "pq1": "",
+    "pq2": "",
+    "pq3": "",
+    "pq4": "",
+    "pq5": "",
+    "causa_raiz": "",
+    "acao": "",
+    "responsavel": "",
+    "prazo": datetime.today()
+}.items():
+    if campo not in st.session_state:
+        st.session_state[campo] = valor_padrao
+
 # Formulário de entrada
 with st.form("registro_problema"):
     st.subheader("📋 Registrar Novo Problema")
@@ -57,8 +75,20 @@ with st.form("registro_problema"):
         df.to_csv(DATA_FILE, index=False)
         st.success("Problema registrado com sucesso!")
 
-        # Limpar todos os campos com session_state.clear e recarregar a página
-        st.session_state.clear()
+        # Reset individual
+        st.session_state.titulo = ""
+        st.session_state.categoria = "Qualidade"
+        st.session_state.descricao = ""
+        st.session_state.pq1 = ""
+        st.session_state.pq2 = ""
+        st.session_state.pq3 = ""
+        st.session_state.pq4 = ""
+        st.session_state.pq5 = ""
+        st.session_state.causa_raiz = ""
+        st.session_state.acao = ""
+        st.session_state.responsavel = ""
+        st.session_state.prazo = datetime.today()
+
         st.rerun()
 
 # Histórico e PDF
