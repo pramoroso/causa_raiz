@@ -22,18 +22,18 @@ else:
 # Formulário de entrada
 with st.form("registro_problema"):
     st.subheader("📋 Registrar Novo Problema")
-    titulo = st.text_input("Título do Problema")
-    categoria = st.selectbox("Categoria", ["Qualidade", "Segurança", "Prazo", "Custo", "Outro"])
-    descricao = st.text_area("Descrição do Problema")
-    pq1 = st.text_input("Por quê 1?")
-    pq2 = st.text_input("Por quê 2?")
-    pq3 = st.text_input("Por quê 3?")
-    pq4 = st.text_input("Por quê 4?")
-    pq5 = st.text_input("Por quê 5?")
-    causa_raiz = st.text_area("Causa Raiz Identificada")
-    acao = st.text_input("Ação Corretiva Sugerida")
-    responsavel = st.text_input("Responsável")
-    prazo = st.date_input("Prazo para Ação")
+    titulo = st.text_input("Título do Problema", key="titulo")
+    categoria = st.selectbox("Categoria", ["Qualidade", "Segurança", "Prazo", "Custo", "Outro"], key="categoria")
+    descricao = st.text_area("Descrição do Problema", key="descricao")
+    pq1 = st.text_input("Por quê 1?", key="pq1")
+    pq2 = st.text_input("Por quê 2?", key="pq2")
+    pq3 = st.text_input("Por quê 3?", key="pq3")
+    pq4 = st.text_input("Por quê 4?", key="pq4")
+    pq5 = st.text_input("Por quê 5?", key="pq5")
+    causa_raiz = st.text_area("Causa Raiz Identificada", key="causa_raiz")
+    acao = st.text_input("Ação Corretiva Sugerida", key="acao")
+    responsavel = st.text_input("Responsável", key="responsavel")
+    prazo = st.date_input("Prazo para Ação", key="prazo")
 
     submitted = st.form_submit_button("Salvar Registro")
 
@@ -56,6 +56,11 @@ with st.form("registro_problema"):
         df = pd.concat([df, pd.DataFrame([nova_linha])], ignore_index=True)
         df.to_csv(DATA_FILE, index=False)
         st.success("Problema registrado com sucesso!")
+
+        # Limpar os campos do formulário
+        for campo in ["titulo", "categoria", "descricao", "pq1", "pq2", "pq3", "pq4", "pq5", "causa_raiz", "acao", "responsavel"]:
+            st.session_state[campo] = ""
+        st.session_state["prazo"] = datetime.today()
 
 # Histórico e PDF
 st.markdown("---")
