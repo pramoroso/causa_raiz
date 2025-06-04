@@ -1,0 +1,65 @@
+
+import streamlit as st
+import pandas as pd
+from datetime import datetime
+
+# Configuração da página
+st.set_page_config(page_title="Causa Raiz", layout="centered", initial_sidebar_state="collapsed")
+
+st.markdown("## 🧠 Causa Raiz")
+st.markdown("### Desenvolvido por Paulo Amoroso")
+st.markdown("---")
+
+# Inicializa o DataFrame
+DATA_FILE = "problemas.csv"
+if os.path.exists(DATA_FILE):
+    df = pd.read_csv(DATA_FILE)
+else:
+    df = pd.DataFrame(columns=["Data", "Título", "Categoria", "Descrição", "Porquê 1", "Porquê 2", "Porquê 3", "Porquê 4", "Porquê 5", "Causa Raiz", "Ação Corretiva", "Responsável", "Prazo"])
+
+# Formulário de entrada
+with st.form("registro_problema"):
+    st.subheader("📋 Registrar Novo Problema")
+    titulo = st.text_input("Título do Problema")
+    categoria = st.selectbox("Categoria", ["Qualidade", "Segurança", "Prazo", "Custo", "Outro"])
+    descricao = st.text_area("Descrição do Problema")
+    pq1 = st.text_input("Por quê 1?")
+    pq2 = st.text_input("Por quê 2?")
+    pq3 = st.text_input("Por quê 3?")
+    pq4 = st.text_input("Por quê 4?")
+    pq5 = st.text_input("Por quê 5?")
+    causa_raiz = st.text_area("Causa Raiz Identificada")
+    acao = st.text_input("Ação Corretiva Sugerida")
+    responsavel = st.text_input("Responsável")
+    prazo = st.date_input("Prazo para Ação")
+
+    submitted = st.form_submit_button("Salvar Registro")
+
+    if submitted:
+        nova_linha = {
+            "Data": datetime.today().strftime("%Y-%m-%d"),
+            "Título": titulo,
+            "Categoria": categoria,
+            "Descrição": descricao,
+            "Porquê 1": pq1,
+            "Porquê 2": pq2,
+            "Porquê 3": pq3,
+            "Porquê 4": pq4,
+            "Porquê 5": pq5,
+            "Causa Raiz": causa_raiz,
+            "Ação Corretiva": acao,
+            "Responsável": responsavel,
+            "Prazo": prazo
+        }
+        df = pd.concat([df, pd.DataFrame([nova_linha])], ignore_index=True)
+        df.to_csv(DATA_FILE, index=False)
+        st.success("Problema registrado com sucesso!")
+
+# Histórico
+st.markdown("---")
+st.subheader("📚 Histórico de Problemas Registrados")
+if df.empty:
+    st.info("Nenhum problema registrado ainda.")
+else:
+    st.dataframe(df.tail(10), use_container_width=True)
+    st.download_button("📥 Baixar CSV", data=df.to_csv(index=False), file_name="causa_raiz_registros.csv", mime="text/csv")
