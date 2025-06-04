@@ -59,7 +59,7 @@ with st.form("registro_problema"):
 
         # Limpar todos os campos com session_state.clear e recarregar a página
         st.session_state.clear()
-        st.experimental_rerun()
+        st.rerun()
 
 # Histórico e PDF
 st.markdown("---")
